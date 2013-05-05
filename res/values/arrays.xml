@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="controller_menu_list">
+        <item>Gesture Controller</item>
+        <item>Connection</item>
+        <item>Exit</item>
+    </string-array>
+    
+    <string-array name="gesture_menu_list">
+        <item>Button Controller</item>
+        <item>Connection</item>
+        <item>Exit</item>
+    </string-array>
+</resources>

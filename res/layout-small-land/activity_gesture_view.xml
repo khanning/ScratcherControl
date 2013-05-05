@@ -1,0 +1,114 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/gesture_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color" >
+    
+    <RelativeLayout
+        android:id="@+id/sensor_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:background="@drawable/sensor_bar_gradient" >
+	    
+        <TextView
+            android:id="@+id/connection_text"
+            android:layout_marginLeft="5dp"
+            android:padding="5dp"
+            android:textColor="@color/connection_red"
+            android:textSize="14sp"
+            style="@style/statusBarLabel"
+            android:text="@string/not_connected" />
+        
+        <ImageButton 
+	        android:id="@+id/menu_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:background="@drawable/ic_menu_overflow"
+	        android:contentDescription="@string/key_description" />
+	    
+        <TextView
+	        android:id="@+id/light_text"
+	        style="@style/statusBarText_xsmall"
+	        android:layout_toLeftOf="@id/menu_button"
+	        android:text="@string/sensor_default" />
+        
+        <ImageView
+            android:id="@+id/light_label"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:layout_toLeftOf="@id/light_text"
+            android:background="@drawable/sun_icon"
+            android:contentDescription="@string/brightness_description" />
+	    
+        <TextView
+	        android:id="@+id/z_text"
+	        style="@style/statusBarText_xsmall"
+	        android:layout_toLeftOf="@id/light_label"
+	        android:text="@string/sensor_default" />
+        
+        <TextView
+            android:id="@+id/z_label"
+            style="@style/statusBarLabel_xsmall"
+            android:layout_toLeftOf="@id/z_text"
+            android:text="@string/z_label" />
+        
+        <TextView
+	        android:id="@+id/y_text"
+	        style="@style/statusBarText_xsmall"
+	        android:layout_toLeftOf="@id/z_label"
+	        android:text="@string/sensor_default" />
+        
+        <TextView
+            android:id="@+id/y_label"
+            style="@style/statusBarLabel_xsmall"
+            android:layout_toLeftOf="@id/y_text"
+            android:text="@string/y_label" />
+                
+        <TextView
+	        android:id="@+id/x_text"
+	        style="@style/statusBarText_xsmall"
+	        android:layout_toLeftOf="@id/y_label"
+	        android:text="@string/sensor_default" />
+        
+        <TextView
+            android:id="@+id/x_label"
+            style="@style/statusBarLabel_xsmall"
+            android:layout_toLeftOf="@id/x_text"
+            android:text="@string/x_label" />
+        
+    </RelativeLayout>
+    
+    <TextView
+        android:id="@+id/gesture_text"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/sensor_bar"
+        android:gravity="center"
+        android:textSize="14sp"
+        android:textColor="@color/gesture_text"
+        android:text="@string/gesture_description" />
+    
+    <RelativeLayout
+        android:id="@+id/menu_dropdown"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sensor_bar"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="3dp"
+        android:visibility="invisible"
+        android:background="@drawable/menu_bg" >
+        
+        <ListView 
+            android:id="@+id/connection_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/gesture_menu_list" />
+        
+    </RelativeLayout>
+    
+</RelativeLayout>
