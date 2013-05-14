@@ -3,12 +3,15 @@
 
     <string name="action_settings">Settings</string>
     <string name="app_name">Scratcher Control</string>
+    <string name="bad_voice_command">Sorry, I didn\'t understand that command</string>
     <string name="brightness_description">Brightness Indicator</string>
+    <string name="broadcast">broadcast</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_connect">Connect</string>
     <string name="button_send">Send</string>
     <string name="connected">Connected</string>
     <string name="connecting">Connecting&#8230;</string>
+    <string name="dpad_description">Directional Pad</string>
     <string name="gesture_description">Tap, Double Tap, Long Press\n\nScroll Up/Down/Left/Right\n\nFlick Up/Down/Left/Right</string>
     <string name="hello_world">Hello world!</string>
     <string name="invalid_ip">Invalid IP Address. Please try again</string>
@@ -23,8 +26,10 @@
     <string name="menu_exit">Exit</string>
     <string name="menu_gesture">Gesture Controller</string>
     <string name="menu_orientation">Rotate Screen</string>
+    <string name="mic_description">Microphone Icon</string>
     <string name="not_connected">Not Connected</string>
     <string name="select">Select</string>
+    <string name="send">send</string>
     <string name="sensor_default">0.0</string>
     <string name="start">Start</string>
     <string name="x_label">X:</string>

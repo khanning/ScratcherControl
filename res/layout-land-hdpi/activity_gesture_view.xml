@@ -111,4 +111,15 @@
         
     </RelativeLayout>
     
+    <ImageButton
+        android:id="@+id/mic_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_below="@id/sensor_bar"
+		android:layout_alignParentLeft="true"
+		android:layout_marginTop="10dp"
+		android:layout_marginLeft="10dp"
+		android:background="@drawable/ic_menu_mic"
+		android:contentDescription="@string/mic_description" />
+    
 </RelativeLayout>
