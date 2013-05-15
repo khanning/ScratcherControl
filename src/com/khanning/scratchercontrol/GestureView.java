@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.speech.RecognizerIntent;
 import android.support.v4.view.GestureDetectorCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -39,9 +40,12 @@ import android.widget.Toast;
 
 public class GestureView extends Activity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
+	private static final int RECOGNITION_RESULT = 1;
+	
 	//Private Object declaration
 	private static Context mContext;
 	private static ImageButton menuButton;
+	private static ImageButton micButton;
 	private static ListView menuList;
 	private static RelativeLayout controllerView;
 	private static RelativeLayout menuView;
@@ -96,6 +100,24 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 	protected void onActivityResult(int requestCode, int resultCode,
             Intent data) {
 		switchActivities = false;
+		
+		switch (requestCode) {
+		case RECOGNITION_RESULT:
+			//Handle Voice Command
+			if (data != null) {
+								
+				VoiceCommand voice = new VoiceCommand(data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS));
+				String command = voice.getCommand();
+				
+				if (voice.isValid()) {
+					Toast.makeText(mContext, command, Toast.LENGTH_SHORT).show();
+					SocketService.setVoiceCommand(command);
+				} else {
+					Toast.makeText(mContext, "Sorry, didn't understand:\n" + command, Toast.LENGTH_SHORT).show();
+				}
+			}
+			break;
+		}
 	}
 	
 	private void setupView() {
@@ -166,6 +188,25 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 		        	finish();
 					break;
 				}
+			}
+		});
+		
+		//Microphone Button OnClickListener
+		micButton = (ImageButton) findViewById(R.id.mic_button);
+		micButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				
+				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+				intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, 
+						getClass().getPackage().getName());
+				intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "\"broadcast jump\",\"send move\"");
+				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, 
+						RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+				
+				switchActivities = true;
+				startActivityForResult(intent, 1);
+				
 			}
 		});
 		

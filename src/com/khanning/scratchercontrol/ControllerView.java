@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.speech.RecognizerIntent;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
@@ -42,11 +43,15 @@ import android.widget.Toast;
 
 public class ControllerView extends Activity {
 	
+	private final static int RECOGNITION_RESULT = 1;
+	
 	//Private Object declaration
 	private static Context mContext;
+	private static ImageButton dpadButton;
 	private static ImageButton selectButton;
 	private static ImageButton startButton;
 	private static ImageButton menuButton;
+	private static ImageButton micButton;
 	private static ListView menuList;
 	private static MessageHandler mHandler;
 	private static RelativeLayout controllerView;
@@ -60,16 +65,21 @@ public class ControllerView extends Activity {
 	//Private primitives declaration
 	private boolean switchActivities;
 	private boolean isPaused;
+	private boolean setDPadPos;
+	private int firstQuadrant;
+	private int secondQuadrant;
 	
 	//Public Object declaration
-	public static ImageButton upButton;
-	public static ImageButton downButton;
-	public static ImageButton leftButton;
-	public static ImageButton rightButton;
 	public static ImageButton aButton;
 	public static ImageButton bButton;
 	public static ImageButton xButton;
 	public static ImageButton yButton;
+	
+	//public primitives declaration
+	public static boolean upButtonPressed;
+	public static boolean downButtonPressed;
+	public static boolean leftButtonPressed;
+	public static boolean rightButtonPressed;
 		
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -106,7 +116,39 @@ public class ControllerView extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode,
             Intent data) {
+		
 		switchActivities = false;
+		
+		switch (requestCode) {
+		case RECOGNITION_RESULT:
+			//Handle Voice Command
+			if (data != null) {
+								
+				VoiceCommand voice = new VoiceCommand(data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS));
+				String command = voice.getCommand();
+				
+				if (voice.isValid()) {
+					Toast.makeText(mContext, command, Toast.LENGTH_SHORT).show();
+					SocketService.setVoiceCommand(command);
+				} else {
+					Toast.makeText(mContext, "Sorry, didn't understand:\n\"" + command + "\"", Toast.LENGTH_SHORT).show();
+				}
+			}
+			break;
+		}
+	}
+	
+	@Override public void onWindowFocusChanged(boolean hasFocus) {
+		//When the view is done being created, calculate the coords of the DPad
+		if (!setDPadPos) {
+			int height = dpadButton.getHeight();
+			
+			firstQuadrant = (int) (height * .3);
+			secondQuadrant = (int) (height * .7);
+			
+			setDPadPos = true;
+		}
+		
 	}
 	
 	private void setupView() {
@@ -142,10 +184,7 @@ public class ControllerView extends Activity {
 		lightText = (TextView) findViewById(R.id.light_text);
 		
 		//Initialize Buttons
-		upButton = (ImageButton) findViewById(R.id.up_arrow_button);
-		downButton = (ImageButton) findViewById(R.id.down_arrow_button);
-		leftButton = (ImageButton) findViewById(R.id.left_arrow_button);
-		rightButton = (ImageButton) findViewById(R.id.right_arrow_button);
+		dpadButton = (ImageButton) findViewById(R.id.dpad_button);
 		aButton = (ImageButton) findViewById(R.id.a_button);
 		bButton = (ImageButton) findViewById(R.id.b_button);
 		xButton = (ImageButton) findViewById(R.id.x_button);
@@ -153,22 +192,67 @@ public class ControllerView extends Activity {
 		selectButton = (ImageButton) findViewById(R.id.select_button);
 		startButton = (ImageButton) findViewById(R.id.start_button);
 		menuButton = (ImageButton) findViewById(R.id.menu_button);
+		micButton = (ImageButton) findViewById(R.id.mic_button);
 		
 		//Set Button OnTouchListeners
-		upButton.setOnTouchListener(touch);
-		downButton.setOnTouchListener(touch);
-		leftButton.setOnTouchListener(touch);
-		rightButton.setOnTouchListener(touch);
 		aButton.setOnTouchListener(touch);
 		bButton.setOnTouchListener(touch);
 		xButton.setOnTouchListener(touch);
 		yButton.setOnTouchListener(touch);
+		
+		//Directional Pad Touch Listener
+		dpadButton.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				
+				int touchX = (int) event.getX();
+				int touchY = (int) event.getY();
+				
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					checkTouchEvent(touchX, touchY);
+					v.vibrate(15);
+					mAudioManager.playSoundEffect(SoundEffectConstants.CLICK);
+					break;
+				case MotionEvent.ACTION_MOVE:
+					checkTouchEvent(touchX, touchY);
+					break;
+				case MotionEvent.ACTION_UP:
+					dpadButton.setBackgroundResource(R.drawable.dpad);
+					upButtonPressed = false;
+					downButtonPressed = false;
+					leftButtonPressed = false;
+					rightButtonPressed = false;
+					break;
+				}
+				return false;
+			}
+			
+		});
 		
 		//Select Button OnClickListener
 		selectButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				SocketService.setGesture("Select");
+			}
+		});
+		
+		//Microphone Button OnClickListener
+		micButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				
+				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+				intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, 
+						getClass().getPackage().getName());
+				intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "[broadcast|send] (name of broadcast)\n[update|change] (name of sensor)");
+				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, 
+						RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+				
+				switchActivities = true;
+				startActivityForResult(intent, 1);
+				
 			}
 		});
 		
@@ -240,6 +324,32 @@ public class ControllerView extends Activity {
 			}
 		});
 		
+	}
+	
+	private void checkTouchEvent(int x, int y) {
+		//Method to determine where the DPad is being pressed
+		
+		if (y < firstQuadrant) {
+			upButtonPressed = true;
+			downButtonPressed = false;
+		} else if (y < secondQuadrant) {
+			upButtonPressed = false;
+			downButtonPressed = false;
+		} else {
+			upButtonPressed = false;
+			downButtonPressed = true;
+		}
+		
+		if (x < firstQuadrant) {
+			leftButtonPressed = true;
+			rightButtonPressed = false;
+		} else if (x < secondQuadrant) {
+			leftButtonPressed = false;
+			rightButtonPressed = false;
+		} else {
+			leftButtonPressed = false;
+			rightButtonPressed = true;
+		}		
 	}
 	
     public static class MessageHandler extends Handler {

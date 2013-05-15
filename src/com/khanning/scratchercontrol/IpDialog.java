@@ -21,9 +21,12 @@ package com.khanning.scratchercontrol;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -38,6 +41,8 @@ public class IpDialog extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.dialog_ip);
+		
+		setDialogSize();
 				
 		errorText = (TextView) findViewById(R.id.dialog_error);
 		ipText = (TextView) findViewById(R.id.dialog_ip_text);
@@ -86,6 +91,29 @@ public class IpDialog extends Activity {
 			}
 		});
 		
+	}
+	
+	private void setDialogSize() {
+		//Method to detect screen size and update dialog window size
+		
+		DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(mDisplayMetrics);
+		
+		int width = mDisplayMetrics.widthPixels;
+		int height = mDisplayMetrics.heightPixels;
+		
+		double x = Math.pow(width/mDisplayMetrics.xdpi,2);
+	    double y = Math.pow(height/mDisplayMetrics.ydpi,2);
+	    double screenInches = Math.sqrt(x+y);
+	
+		Log.i("ScratcherControl", "Inches: " + screenInches);
+			    
+		if (screenInches > 6 && width > 1200) {
+			getWindow().setLayout(900, WindowManager.LayoutParams.WRAP_CONTENT);
+		} else {
+			getWindow().setLayout(5*width/7, WindowManager.LayoutParams.WRAP_CONTENT);
+		}
+				
 	}
 	
 }

@@ -61,6 +61,7 @@ public class SocketService extends Service {
 	private static Socket mSocket;
 	private static String gestureAction;
 	private static String ipAddress;
+	private static String voiceCommand;
 	
 	//Public primitive declaration
 	public static boolean isConnected;
@@ -72,6 +73,10 @@ public class SocketService extends Service {
 	
 	public static void setGesture(String gesture) {
 		gestureAction = gesture;
+	}
+	
+	public static void setVoiceCommand(String command) {
+		voiceCommand = command;
 	}
 	
 	public static void connectTo(String ip) {
@@ -181,6 +186,9 @@ public class SocketService extends Service {
 					if (gestureAction!=null) {
 						sendCommand("broadcast " + gestureAction);
 						gestureAction = null;
+					} else if (voiceCommand!=null) {
+						sendCommand(voiceCommand);
+						voiceCommand = null;
 					} else {
 					
 						//Create a single command to update values
@@ -190,10 +198,10 @@ public class SocketService extends Service {
 						command += " accelerometer-z " + SensorService.zVal;
 						command += " light-level " + SensorService.lightVal;
 											
-						command += " button-up-pressed " + ControllerView.upButton.isPressed();
-						command += " button-down-pressed " + ControllerView.downButton.isPressed();
-						command += " button-left-pressed " + ControllerView.leftButton.isPressed();
-						command += " button-right-pressed " + ControllerView.rightButton.isPressed();
+						command += " button-up-pressed " + ControllerView.upButtonPressed;
+						command += " button-down-pressed " + ControllerView.downButtonPressed;
+						command += " button-left-pressed " + ControllerView.leftButtonPressed;
+						command += " button-right-pressed " + ControllerView.rightButtonPressed;
 						command += " button-a-pressed " + ControllerView.aButton.isPressed();
 						command += " button-b-pressed " + ControllerView.bButton.isPressed();
 						command += " button-x-pressed " + ControllerView.xButton.isPressed();

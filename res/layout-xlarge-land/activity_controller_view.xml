@@ -112,9 +112,9 @@
 		    
 		    <ImageButton
 		        android:id="@+id/y_button"
-		        android:layout_width="160dp"
-		        android:layout_height="160dp"
-		        android:layout_marginBottom="-10dp"
+		        android:layout_width="150dp"
+		        android:layout_height="150dp"
+		        android:layout_marginBottom="-20dp"
 		        android:layout_centerHorizontal="true"
 		        android:background="@drawable/button_y"
 		        android:contentDescription="@string/key_description" />
@@ -129,16 +129,16 @@
 		    
 			    <ImageButton
 			        android:id="@+id/x_button"
-			        android:layout_width="160dp"
-			        android:layout_height="160dp"
+			        android:layout_width="150dp"
+			        android:layout_height="150dp"
 			        android:layout_marginRight="80dp"
 			        android:background="@drawable/button_x"
 			        android:contentDescription="@string/key_description" />
 			    
 			    <ImageButton
 			        android:id="@+id/b_button"
-			        android:layout_width="160dp"
-			        android:layout_height="160dp"
+			        android:layout_width="150dp"
+			        android:layout_height="150dp"
 			        android:background="@drawable/button_b"
 			        android:contentDescription="@string/key_description" />
 			    
@@ -146,9 +146,9 @@
 		    
 		    <ImageButton
 		        android:id="@+id/a_button"
-		        android:layout_width="160dp"
-		        android:layout_height="160dp"
-		        android:layout_marginTop="-10dp"
+		        android:layout_width="150dp"
+		        android:layout_height="150dp"
+		        android:layout_marginTop="-20dp"
 		        android:layout_centerHorizontal="true"
 		        android:layout_below="@id/arrow_xb_layout"
 		        android:background="@drawable/button_a"
