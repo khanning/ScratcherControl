@@ -111,15 +111,34 @@
         
     </RelativeLayout>
     
-    <ImageButton
-        android:id="@+id/mic_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <LinearLayout
+        android:id="@+id/microphone"
         android:layout_below="@id/sensor_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
 		android:layout_alignParentLeft="true"
 		android:layout_marginTop="20dp"
 		android:layout_marginLeft="20dp"
-		android:background="@drawable/ic_menu_mic"
-		android:contentDescription="@string/mic_description" />
+		android:orientation="horizontal" >
+        
+        <ImageView
+	        android:id="@+id/mic_image"
+	        android:layout_width="40dp"
+	        android:layout_height="40dp"
+			android:background="@drawable/ic_menu_mic"
+			android:contentDescription="@string/mic_description" />
+    
+	    <TextView 
+	        android:id="@+id/mic_text"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_vertical"
+	        android:layout_marginLeft="5dp"
+	        android:textColor="@color/sensor_bg_light"
+	        android:textSize="26sp"
+	        android:textStyle="bold"
+	        android:text="@string/mic_default" />
+        
+    </LinearLayout>
     
 </RelativeLayout>

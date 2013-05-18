@@ -47,6 +47,11 @@ public class SocketService extends Service {
 	public final static int CONNECTION_REFUSED  = 3;
 	public final static int DISCONNECTED 		= 4;
 	public final static int SENSOR_UPDATE 		= 5;
+	public final static int VOICE_INIT			= 6;
+	public final static int VOICE_LISTEN		= 7;
+	public final static int VOICE_RESULTS		= 8;
+	public final static int VOICE_ANALYZING		= 9;
+	public final static int VOICE_CANCEL		= 10;
 	
 	public final static int CONTROLLER_VIEW 	= 0;
 	public final static int GESTURE_VIEW 		= 1;

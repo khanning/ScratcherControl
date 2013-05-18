@@ -19,12 +19,14 @@ along with ScratcherControl.  If not, see <http://www.gnu.org/licenses/>.
 package com.khanning.scratchercontrol;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.speech.RecognizerIntent;
 import android.support.v4.view.GestureDetectorCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -33,28 +35,34 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class GestureView extends Activity implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
-
-	private static final int RECOGNITION_RESULT = 1;
+	
+	private final static String MIC_PREFS = "MicPrefs";
 	
 	//Private Object declaration
 	private static Context mContext;
 	private static ImageButton menuButton;
-	private static ImageButton micButton;
+	private static LinearLayout micView;
 	private static ListView menuList;
+	private static ImageView micImage;
 	private static RelativeLayout controllerView;
 	private static RelativeLayout menuView;
 	private static MessageHandler mHandler;
+	private static SharedPreferences mSharedPreferences;
+	private static SpeechCommand mSpeechCommand;
 	private static TextView xText;
 	private static TextView yText;
 	private static TextView zText;
 	private static TextView lightText;
 	private static TextView connectionText;
+	private static TextView micText;
 	private GestureDetectorCompat mGesture;
 	
 	//Private primitive declaration
@@ -71,6 +79,12 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 		mHandler = new MessageHandler();
 		
 		setupView();
+		
+		//Get Shared Preferences
+		mSharedPreferences = getSharedPreferences(MIC_PREFS, 0);
+		
+		//Create a speech recognizer
+		mSpeechCommand = new SpeechCommand(mContext, mHandler);
 		
 		//Start SensorService and pass it the MessageHandler
 		startService(new Intent(this, SensorService.class));
@@ -100,24 +114,6 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 	protected void onActivityResult(int requestCode, int resultCode,
             Intent data) {
 		switchActivities = false;
-		
-		switch (requestCode) {
-		case RECOGNITION_RESULT:
-			//Handle Voice Command
-			if (data != null) {
-								
-				VoiceCommand voice = new VoiceCommand(data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS));
-				String command = voice.getCommand();
-				
-				if (voice.isValid()) {
-					Toast.makeText(mContext, command, Toast.LENGTH_SHORT).show();
-					SocketService.setVoiceCommand(command);
-				} else {
-					Toast.makeText(mContext, "Sorry, didn't understand:\n" + command, Toast.LENGTH_SHORT).show();
-				}
-			}
-			break;
-		}
 	}
 	
 	private void setupView() {
@@ -126,6 +122,10 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 		//Initialize Layouts
 		controllerView = (RelativeLayout) findViewById(R.id.gesture_view);
 		menuView = (RelativeLayout) findViewById(R.id.menu_dropdown);
+		micView = (LinearLayout) findViewById(R.id.microphone);
+		
+		//Initialize ImageViews
+		micImage = (ImageView) findViewById(R.id.mic_image);
 		
 		//Initialize TextViews
 		xText = (TextView) findViewById(R.id.x_text);
@@ -133,6 +133,7 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 		zText = (TextView) findViewById(R.id.z_text);
 		lightText = (TextView) findViewById(R.id.light_text);
 		connectionText = (TextView) findViewById(R.id.connection_text);
+		micText = (TextView) findViewById(R.id.mic_text);
 		
 		//Connection Label OnClickListener 
 		connectionText.setOnClickListener(new OnClickListener() {
@@ -152,6 +153,7 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 					menuView.setVisibility(RelativeLayout.INVISIBLE);
 				} else {
 					menuView.setVisibility(RelativeLayout.VISIBLE);
+					menuView.bringToFront();
 					controllerView.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
@@ -191,24 +193,35 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 			}
 		});
 		
-		//Microphone Button OnClickListener
-		micButton = (ImageButton) findViewById(R.id.mic_button);
-		micButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				
-				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-				intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, 
-						getClass().getPackage().getName());
-				intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "\"broadcast jump\",\"send move\"");
-				intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, 
-						RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-				
-				switchActivities = true;
-				startActivityForResult(intent, 1);
-				
-			}
-		});
+		//Microphone View OnClickListener
+				micView.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						
+						if (mSharedPreferences.getBoolean("voice_helper", false)) {
+							mSpeechCommand.listen();
+						} else {
+							AlertDialog.Builder voiceHelper = new AlertDialog.Builder(mContext);
+							voiceHelper.setTitle(getResources().getString(R.string.voice_helper_title));
+							voiceHelper.setMessage(getResources().getString(R.string.voice_helper_text));
+							voiceHelper.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int id) {
+									SharedPreferences.Editor editor = mSharedPreferences.edit();
+									editor.putBoolean("voice_helper", true).commit();
+									mSpeechCommand.listen();
+								}
+							});
+							voiceHelper.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int id) {
+									
+								}
+							});
+							
+							voiceHelper.create().show();
+							
+						}				
+					}
+				});
 		
 	}
 
@@ -246,6 +259,35 @@ public class GestureView extends Activity implements GestureDetector.OnGestureLi
 				yText.setText(sensor[1]);
 				zText.setText(sensor[2]);
 				lightText.setText(sensor[3]);
+				break;
+			case SocketService.VOICE_INIT:
+				micText.setTextColor(mContext.getResources().getColor(R.color.sensor_bg));
+				micText.setText(mContext.getResources().getString(R.string.mic_initializing));
+				micImage.setBackgroundResource(R.drawable.ic_menu_mic_black);
+				break;
+			case SocketService.VOICE_LISTEN:
+				micText.setTextColor(mContext.getResources().getColor(R.color.mic_green));
+				micText.setText(mContext.getResources().getString(R.string.mic_listen));
+				micImage.setBackgroundResource(R.drawable.ic_menu_mic_green);
+				break;
+			case SocketService.VOICE_ANALYZING:
+				micText.setTextColor(mContext.getResources().getColor(R.color.mic_blue));
+				micText.setText(mContext.getResources().getString(R.string.mic_analyzing));
+				micImage.setBackgroundResource(R.drawable.ic_menu_mic_blue);
+				break;
+			case SocketService.VOICE_RESULTS:
+				String command = msg.obj.toString();
+				Toast.makeText(mContext, command, Toast.LENGTH_SHORT).show();
+				SocketService.setVoiceCommand(command);
+				micText.setTextColor(mContext.getResources().getColor(R.color.sensor_bg_light));
+				micText.setText(mContext.getResources().getString(R.string.mic_default));
+				micImage.setBackgroundResource(R.drawable.ic_menu_mic);
+				break;
+			case SocketService.VOICE_CANCEL:
+				micText.setTextColor(mContext.getResources().getColor(R.color.sensor_bg_light));
+				micText.setText(mContext.getResources().getString(R.string.mic_default));
+				micImage.setBackgroundResource(R.drawable.ic_menu_mic);
+				Toast.makeText(mContext, mContext.getResources().getString(R.string.bad_voice_command), Toast.LENGTH_SHORT).show();
 				break;
 			}
 		}

@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,7 +32,7 @@ import android.widget.TextView;
 public class IpDialog extends Activity {
 	
 	private final static String PREFS_NAME = "SocketPrefs";
-	private static SharedPreferences scratchSettings;
+	private static SharedPreferences mSharedPreferences;
 	private static TextView errorText;
 	private static TextView ipText;
 	
@@ -48,9 +47,9 @@ public class IpDialog extends Activity {
 		ipText = (TextView) findViewById(R.id.dialog_ip_text);
 		
 		//Check if there is a cached IP address
-		scratchSettings = getSharedPreferences(PREFS_NAME, 0);
-		if (scratchSettings.contains("ip"))
-			ipText.setText(scratchSettings.getString("ip", "false"));
+		mSharedPreferences = getSharedPreferences(PREFS_NAME, 0);
+		if (mSharedPreferences.contains("ip"))
+			ipText.setText(mSharedPreferences.getString("ip", "false"));
 		
 		Button connectButton = (Button) findViewById(R.id.ip_dialog_connect);
 		connectButton.setOnClickListener(new OnClickListener() {
@@ -64,7 +63,7 @@ public class IpDialog extends Activity {
 				if (Patterns.IP_ADDRESS.matcher(ip).matches()) {
 					
 					//Cache the IP address
-					SharedPreferences.Editor editor = scratchSettings.edit();
+					SharedPreferences.Editor editor = mSharedPreferences.edit();
 					editor.putString("ip", ip).commit();
 					
 					//If the socket is connected, close it
@@ -103,11 +102,9 @@ public class IpDialog extends Activity {
 		int height = mDisplayMetrics.heightPixels;
 		
 		double x = Math.pow(width/mDisplayMetrics.xdpi,2);
-	    double y = Math.pow(height/mDisplayMetrics.ydpi,2);
-	    double screenInches = Math.sqrt(x+y);
-	
-		Log.i("ScratcherControl", "Inches: " + screenInches);
-			    
+		double y = Math.pow(height/mDisplayMetrics.ydpi,2);
+		double screenInches = Math.sqrt(x+y);
+	    
 		if (screenInches > 6 && width > 1200) {
 			getWindow().setLayout(900, WindowManager.LayoutParams.WRAP_CONTENT);
 		} else {
